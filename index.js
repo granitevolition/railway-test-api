@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const config = require('./config');
+const db = require('./db');
 const { router: authRouter, verifyToken, requireAdmin } = require('./routes/auth');
 const usersRouter = require('./routes/users');
 const analyticsRouter = require('./routes/analytics');
+const registrationsRouter = require('./routes/registrations');
 
 const app = express();
 const PORT = config.PORT;
@@ -60,44 +62,52 @@ app.get('/', (req, res) => {
   });
 });
 
+// Initialize database
+db.initDatabase();
+
 // Auth routes
 app.use('/api/auth', authRouter);
+
+// Public registration endpoint
+app.use('/api/register', registrationsRouter);
 
 // Protected routes
 app.use('/api/users', verifyToken, requireAdmin, usersRouter);
 app.use('/api/analytics', verifyToken, requireAdmin, analyticsRouter);
+app.use('/api/admin/registrations', verifyToken, requireAdmin, registrationsRouter);
 
 // Dashboard summary endpoint
-app.get('/api/dashboard', verifyToken, requireAdmin, (req, res) => {
-  const userCount = config.DB.users.length;
-  const transactionCount = config.DB.transactions.length;
-  const totalRevenue = config.DB.transactions.reduce((sum, tx) => sum + tx.amount, 0);
-  const activeUsers = new Set(config.DB.usage_logs
-    .filter(log => {
-      const logDate = new Date(log.timestamp);
-      const daysSinceLog = (new Date() - logDate) / (1000 * 60 * 60 * 24);
-      return daysSinceLog <= 7;
-    })
-    .map(log => log.user_id)
-  ).size;
-  
-  res.json({
-    success: true,
-    data: {
-      users: {
-        total: userCount,
-        active: activeUsers
-      },
-      transactions: {
-        count: transactionCount,
-        revenue: totalRevenue
-      },
-      system: {
-        status: 'online',
-        uptime: process.uptime()
+app.get('/api/dashboard', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    // Get registration count from database
+    const registrationResult = await db.query('SELECT COUNT(*) FROM registrations');
+    const registrationCount = parseInt(registrationResult.rows[0].count);
+    
+    // Get user count
+    const userCount = config.DB.users.length;
+    
+    res.json({
+      success: true,
+      data: {
+        users: {
+          total: userCount
+        },
+        registrations: {
+          total: registrationCount
+        },
+        system: {
+          status: 'online',
+          uptime: process.uptime()
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching dashboard data'
+    });
+  }
 });
 
 // Start the server
