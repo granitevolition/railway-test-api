@@ -1,80 +1,92 @@
-# Railway Test API
+# Andikar Admin Backend
 
-A simple Express API designed for testing Railway.com deployment.
+A simple admin backend for managing the Andikar AI system. This API provides administrative functionality for user management, analytics, and system monitoring.
 
-## Quick Start
+## Features
 
-```bash
-# Clone the repository
-git clone https://github.com/granitevolition/railway-test-api.git
-cd railway-test-api
-
-# Install dependencies
-npm install
-
-# Run in development
-npm start
-```
+- **Authentication:** Secure admin login with JWT-based authentication
+- **User Management:** Create, read, update, and delete users
+- **Analytics:** Track system usage and performance metrics
+- **Dashboard:** Get summary data for the admin dashboard
 
 ## API Endpoints
 
-- `GET /` - Basic welcome message with timestamp
-- `GET /api/test` - Test endpoint with environment information and Railway data
-- `POST /api/echo` - Echo back any JSON sent in request body
+### Authentication
 
-## Deploying to Railway
+- `POST /api/auth/login` - Admin login
 
-1. Fork or clone this repository to your GitHub account
-2. Go to [Railway.com](https://railway.app/) and sign in
-3. Click "New Project" and select "Deploy from GitHub repo"
-4. Select this repository from the list
-5. Railway will automatically detect the Node.js app and deploy it
-6. Once deployed, you can access your API at the URL provided by Railway
+### Users
 
-Railway will automatically:
-- Install dependencies based on package.json
-- Start the server using the start script
-- Assign a random port and make it available as PORT environment variable
-- Provide a public URL for your API
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create a new user
+- `PUT /api/users/:id` - Update a user
+- `DELETE /api/users/:id` - Delete a user
 
-## Environment Variables
+### Analytics
 
-Railway automatically provides these environment variables:
-- `PORT`: The port your app should listen on
-- `RAILWAY_PROJECT_ID`: Your Railway project ID
-- `RAILWAY_SERVICE_ID`: Your service ID
+- `GET /api/analytics/usage` - Get usage statistics
+- `GET /api/analytics/transactions` - Get transaction statistics
+- `GET /api/analytics/health` - Get system health information
 
-## Local Development
+### Dashboard
 
-```bash
-# Install nodemon for development (auto-restart)
-npm install -g nodemon
+- `GET /api/dashboard` - Get dashboard summary data
 
-# Run with auto-restart on file changes
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Create a `.env` file with the following variables:
+   ```
+   PORT=3001
+   JWT_SECRET=your_secret_key
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=your_secure_password
+   ```
+
+### Running the Server
+
+Development mode:
+```
 npm run dev
 ```
 
-## Testing the API
-
-You can test the API endpoints using curl or a tool like Postman:
-
-```bash
-# Test root endpoint
-curl https://your-railway-url.railway.app/
-
-# Test API endpoint
-curl https://your-railway-url.railway.app/api/test
-
-# Test echo endpoint
-curl -X POST -H "Content-Type: application/json" -d '{"message":"Hello Railway"}' https://your-railway-url.railway.app/api/echo
+Production mode:
+```
+npm start
 ```
 
-## Project Structure
+## Environment Variables
 
-```
-railway-test-api/
-├── index.js          # Main application file
-├── package.json      # Dependencies and scripts
-├── .gitignore        # Git ignore file
-└── README.md         # Project documentation
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| PORT | Server port | 3001 |
+| JWT_SECRET | Secret for JWT token generation | andikar-admin-secret-key |
+| ADMIN_USERNAME | Admin username | admin |
+| ADMIN_PASSWORD | Admin password | admin123 |
+
+## Integration with Andikar Frontend
+
+This admin backend is designed to work with the Andikar frontend application. The frontend connects to this API for administrative functions.
+
+## Deployment
+
+This project is configured for deployment on Railway.com. The `package.json` includes the necessary configuration for Railway deployment.
+
+## Security Considerations
+
+- Change the default admin credentials in production
+- Set a strong JWT secret in production
+- Enable HTTPS in production
+- Implement rate limiting for production use
